@@ -21,10 +21,14 @@ class NocList:
 	def get_api_token(self):
 		request_attempts = 0
 
-		while request_attempts < self.request_retry_limit:
-			auth_response = requests.get(self.auth_endpoint, timeout = self.request_timeout)
-			if auth_response.status_code == requests.codes.ok:
-				break
+		while request_attempts < self.request_retry_limit: 
+			try:
+				auth_response = requests.get(self.auth_endpoint, timeout = self.request_timeout)
+				if auth_response.status_code == requests.codes.ok:
+					break
+			except requests.exceptions.ConnectionError:
+				request_attempts += 1
+				continue
 			request_attempts += 1
 
 		if request_attempts >= self.request_retry_limit:
@@ -41,9 +45,13 @@ class NocList:
 		request_attempts = 0
 
 		while request_attempts < self.request_retry_limit:
-			get_user_list_response = requests.get(self.users_endpoint, headers = get_users_request_headers, timeout = self.request_timeout)
-			if get_user_list_response.status_code == requests.codes.ok:
-					break
+			try:
+				get_user_list_response = requests.get(self.users_endpoint, headers = get_users_request_headers, timeout = self.request_timeout)
+				if get_user_list_response.status_code == requests.codes.ok:
+						break
+			except requests.exceptions.ConnectionError:
+				request_attempts += 1
+				continue
 			request_attempts += 1
 
 		if request_attempts >= self.request_retry_limit:
